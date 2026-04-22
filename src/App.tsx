@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import CabecalhoFicha from "./components/CabecalhoFicha";
-import SecaoIngredientes from "./components/SecaoIngredientes";
-import SecaoPreparo from "./components/SecaoPreparo";
+import SecaoIngredientes from "./components/SecaoIngredientesPreparo";
+import SecaoPreparo from "./components/SecaoRendimentoEquipamentos";
 import SecaoNutricaoCustos from "./components/SecaoNutricaoCustos";
 
 function App() {
@@ -26,7 +26,6 @@ function App() {
             gestao-fichas-tecnicas
           </p>
 
-          {/* Botão alternar tema */}
           <button
             onClick={() => setTemaEscuro(!temaEscuro)}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow transition-colors"
