@@ -151,16 +151,29 @@ export default function SecaoRendimentoEquipamentos() {
             </div>
           </div>
 
-          <div className="flex flex-col">
-            <label className={estiloLabel}>MEDIDA CASEIRA / PORÇÃO:</label>
-            <input
-              type="text"
-              name="medidaCaseiraPorcao"
-              value={rendimento.medidaCaseiraPorcao}
-              onChange={lidarComTexto}
-              className={estiloInput}
-              placeholder="Ex: 1 fatia média"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <label className={estiloLabel}>MEDIDA CASEIRA / PORÇÃO:</label>
+              <input
+                type="text"
+                name="medidaCaseiraPorcao"
+                value={rendimento.medidaCaseiraPorcao}
+                onChange={lidarComTexto}
+                className={estiloInput}
+                placeholder="Ex: 1 fatia média"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className={estiloLabel}>TEMPO DE PREPARO:</label>
+              <input
+                type="text"
+                name="tempoPreparo"
+                value={rendimento.tempoPreparo || ""}
+                onChange={lidarComTexto}
+                className={estiloInput}
+                placeholder="Ex: 40 min"
+              />
+            </div>
           </div>
         </div>
 

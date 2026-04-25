@@ -7,6 +7,8 @@ import {
 } from "../types/ficha";
 
 interface FichaContextType {
+  fichaId: string;
+  setFichaId: React.Dispatch<React.SetStateAction<string>>;
   ingredientes: Ingrediente[];
   setIngredientes: React.Dispatch<React.SetStateAction<Ingrediente[]>>;
   rendimento: DadosRendimento;
@@ -17,11 +19,23 @@ interface FichaContextType {
   setTecnicaPreparo: React.Dispatch<React.SetStateAction<string>>;
   nutricaoECustos: DadosNutricionais[];
   setNutricaoECustos: React.Dispatch<React.SetStateAction<DadosNutricionais[]>>;
+  dadosExtras: Record<string, Partial<DadosNutricionais>>;
+  setDadosExtras: React.Dispatch<
+    React.SetStateAction<Record<string, Partial<DadosNutricionais>>>
+  >;
+  baseExtras: Record<string, Partial<DadosNutricionais>>;
+  setBaseExtras: React.Dispatch<
+    React.SetStateAction<Record<string, Partial<DadosNutricionais>>>
+  >;
+  limparFicha: () => void;
+  carregarFichaSalva: (dados: any) => void;
+  obterFichaAtualParaSalvar: () => any;
 }
 
 const FichaContext = createContext<FichaContextType | undefined>(undefined);
 
 export const FichaProvider = ({ children }: { children: ReactNode }) => {
+  const [fichaId, setFichaId] = useState<string>(crypto.randomUUID());
   const [ingredientes, setIngredientes] = useState<Ingrediente[]>([
     {
       id: crypto.randomUUID(),
@@ -31,15 +45,9 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
       medidaCaseira: "",
     },
   ]);
-
   const [informacoesGerais, setInformacoesGerais] = useState<InformacoesGerais>(
-    {
-      alunos: "",
-      preparacao: "",
-      categoria: "",
-    },
+    { alunos: "", preparacao: "", categoria: "" },
   );
-
   const [rendimento, setRendimento] = useState<DadosRendimento>({
     equipamentos: "",
     tempoPreparo: "",
@@ -50,29 +58,88 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
     medidaCaseiraPorcao: "",
     historico: [],
   });
-
   const [tecnicaPreparo, setTecnicaPreparo] = useState("");
-  const [nutricaoECustos, setNutricaoECustos] = useState<DadosNutricionais[]>([
-    {
-      id: crypto.randomUUID(),
-      nome: "",
-      perCapitaBruto: 0,
-      precoUnitario: 0,
-      custoUnitario: 0,
-      perCapitaLiquido: 0,
-      energia: 0,
-      carboidratos: 0,
-      proteinas: 0,
-      lipideos: 0,
-      lipideosSaturados: 0,
-      sodio: 0,
-      fibra: 0,
-    },
-  ]);
+  const [nutricaoECustos, setNutricaoECustos] = useState<DadosNutricionais[]>(
+    [],
+  );
+
+  const [dadosExtras, setDadosExtras] = useState<
+    Record<string, Partial<DadosNutricionais>>
+  >({});
+  const [baseExtras, setBaseExtras] = useState<
+    Record<string, Partial<DadosNutricionais>>
+  >({});
+
+  const limparFicha = () => {
+    setFichaId(crypto.randomUUID());
+    setInformacoesGerais({ alunos: "", preparacao: "", categoria: "" });
+    setIngredientes([
+      {
+        id: crypto.randomUUID(),
+        nome: "",
+        pesoBruto: 0,
+        pesoLiquido: 0,
+        medidaCaseira: "",
+      },
+    ]);
+    setRendimento({
+      equipamentos: "",
+      tempoPreparo: "",
+      fatorCoccao: 0,
+      pesoTotal: 0,
+      rendimentoPorcoes: 0,
+      pesoPorcao: 0,
+      medidaCaseiraPorcao: "",
+      historico: [],
+    });
+    setTecnicaPreparo("");
+    setNutricaoECustos([]);
+    setDadosExtras({});
+    setBaseExtras({});
+  };
+
+  const carregarFichaSalva = (dados: any) => {
+    setFichaId(dados.id);
+    setInformacoesGerais(
+      dados.informacoesGerais || { alunos: "", preparacao: "", categoria: "" },
+    );
+    setIngredientes(dados.ingredientes || []);
+    setRendimento(
+      dados.rendimento || {
+        equipamentos: "",
+        tempoPreparo: "",
+        fatorCoccao: 0,
+        pesoTotal: 0,
+        rendimentoPorcoes: 0,
+        pesoPorcao: 0,
+        medidaCaseiraPorcao: "",
+        historico: [],
+      },
+    );
+    setTecnicaPreparo(dados.tecnicaPreparo || "");
+    setNutricaoECustos(dados.nutricaoECustos || []);
+    setDadosExtras(dados.dadosExtras || {});
+    setBaseExtras(dados.baseExtras || {});
+  };
+
+  const obterFichaAtualParaSalvar = () => {
+    return {
+      id: fichaId,
+      informacoesGerais,
+      ingredientes,
+      rendimento,
+      tecnicaPreparo,
+      nutricaoECustos,
+      dadosExtras,
+      baseExtras,
+    };
+  };
 
   return (
     <FichaContext.Provider
       value={{
+        fichaId,
+        setFichaId,
         ingredientes,
         setIngredientes,
         rendimento,
@@ -83,6 +150,13 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
         setTecnicaPreparo,
         nutricaoECustos,
         setNutricaoECustos,
+        dadosExtras,
+        setDadosExtras,
+        baseExtras,
+        setBaseExtras,
+        limparFicha,
+        carregarFichaSalva,
+        obterFichaAtualParaSalvar,
       }}
     >
       {children}

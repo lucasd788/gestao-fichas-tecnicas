@@ -1,15 +1,11 @@
-import { useState } from "react";
+import { useFicha } from "../contexts/FichaContext";
 
-export default function CabecalhoFicha() {
-  const [cabecalho, setCabecalho] = useState({
-    alunos: "",
-    preparacao: "",
-    categoria: "",
-  });
+export default function informacoesGeraisFicha() {
+  const { informacoesGerais, setInformacoesGerais } = useFicha();
 
   const lidarComMudanca = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCabecalho((dadosAnteriores) => ({
+    setInformacoesGerais((dadosAnteriores) => ({
       ...dadosAnteriores,
       [name]: value,
     }));
@@ -32,7 +28,7 @@ export default function CabecalhoFicha() {
             type="text"
             name="preparacao"
             placeholder="Ex: Bolo de Cenoura com Chocolate"
-            value={cabecalho.preparacao}
+            value={informacoesGerais.preparacao}
             onChange={lidarComMudanca}
             className={estiloInput}
           />
@@ -43,7 +39,7 @@ export default function CabecalhoFicha() {
             type="text"
             name="categoria"
             placeholder="Ex: Sobremesa, Prato Principal..."
-            value={cabecalho.categoria}
+            value={informacoesGerais.categoria}
             onChange={lidarComMudanca}
             className={estiloInput}
           />
@@ -54,7 +50,7 @@ export default function CabecalhoFicha() {
             type="text"
             name="alunos"
             placeholder="Ex: Turma A, Evento Corporativo..."
-            value={cabecalho.alunos}
+            value={informacoesGerais.alunos}
             onChange={lidarComMudanca}
             className={estiloInput}
           />

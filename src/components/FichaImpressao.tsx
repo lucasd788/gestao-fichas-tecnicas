@@ -45,11 +45,11 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
       <style
         dangerouslySetInnerHTML={{
           __html: `
-@media print {
-@page { size: landscape; margin: 10mm; }
-body { -webkit-print-color-adjust: exact; }
-}
-`,
+        @media print {
+        @page { size: landscape; margin: 10mm; }
+        body { -webkit-print-color-adjust: exact; }
+        }
+        `,
         }}
       />
       <div className="break-after-page min-h-[190mm] flex flex-col">
@@ -125,17 +125,17 @@ body { -webkit-print-color-adjust: exact; }
                     {ing?.nome || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {ing?.pesoBruto || ""}
+                    {ing?.pesoBruto.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {ing?.pesoLiquido || ""}
+                    {ing?.pesoLiquido.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">{fc}</td>
                   <td className="border border-black p-1">
-                    {nutri?.perCapitaBruto || ""}
+                    {nutri?.perCapitaBruto.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.perCapitaLiquido || ""}
+                    {nutri?.perCapitaLiquido.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1 text-left px-3">
                     {ing?.medidaCaseira || ""}
@@ -171,7 +171,7 @@ body { -webkit-print-color-adjust: exact; }
               <span className="font-bold">
                 Indicador de Conversão (Fator de Cocção):
               </span>{" "}
-              {rendimento.fatorCoccao}
+              {rendimento.fatorCoccao?.toString().replace(",", ".")}
             </div>
             <div>
               <span className="font-bold">Peso da porção (g):</span>{" "}
@@ -280,37 +280,37 @@ body { -webkit-print-color-adjust: exact; }
                     {nutri?.nome || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.perCapitaBruto || ""}
+                    {nutri?.perCapitaBruto.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.precoUnitario || ""}
+                    {nutri?.precoUnitario.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.custoUnitario || ""}
+                    {nutri?.custoUnitario.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.perCapitaLiquido || ""}
+                    {nutri?.perCapitaLiquido.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.energia || ""}
+                    {nutri?.energia.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.carboidratos || ""}
+                    {nutri?.carboidratos.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.proteinas || ""}
+                    {nutri?.proteinas.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.lipideos || ""}
+                    {nutri?.lipideos.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.lipideosSaturados || ""}
+                    {nutri?.lipideosSaturados.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.sodio || ""}
+                    {nutri?.sodio.toFixed(2) || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.fibra || ""}
+                    {nutri?.fibra.toFixed(2) || ""}
                   </td>
                 </tr>
               );
@@ -324,25 +324,25 @@ body { -webkit-print-color-adjust: exact; }
               </td>
               <td className="border border-black p-2">- - - -</td>
               <td className="border border-black p-2">
-                {totais.energia.toFixed(1)}
+                {totais.energia.toFixed(2)}
               </td>
               <td className="border border-black p-2">
-                {totais.carb.toFixed(1)}
+                {totais.carb.toFixed(2)}
               </td>
               <td className="border border-black p-2">
-                {totais.prot.toFixed(1)}
+                {totais.prot.toFixed(2)}
               </td>
               <td className="border border-black p-2">
-                {totais.lip.toFixed(1)}
+                {totais.lip.toFixed(2)}
               </td>
               <td className="border border-black p-2">
-                {totais.sat.toFixed(1)}
+                {totais.sat.toFixed(2)}
               </td>
               <td className="border border-black p-2">
-                {totais.sodio.toFixed(1)}
+                {totais.sodio.toFixed(2)}
               </td>
               <td className="border border-black p-2">
-                {totais.fibra.toFixed(1)}
+                {totais.fibra.toFixed(2)}
               </td>
             </tr>
           </tbody>

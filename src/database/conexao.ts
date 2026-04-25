@@ -20,8 +20,17 @@ export async function iniciarBancoDeDados() {
         lipideosSaturados REAL DEFAULT 0,
         sodio REAL DEFAULT 0,
         fibra REAL DEFAULT 0
-      );
-    `);
+        );
+        `);
+
+        await db.execute(`
+        CREATE TABLE IF NOT EXISTS fichas_salvas (
+        id TEXT PRIMARY KEY,
+        nome TEXT NOT NULL,
+        data_atualizacao TEXT NOT NULL,
+        dados_json TEXT NOT NULL
+        );
+        `);
 
         await popularBancoSeVazio(db);
 
@@ -83,4 +92,38 @@ export async function buscarDadosTabela(): Promise<Record<string, any>> {
         mapa[item.nome] = item;
     }
     return mapa;
+}
+
+export async function guardarFichaDB(id: string, nome: string, dadosJson: string) {
+    const db = await Database.load(DADOS);
+    const dataAtual = new Date().toLocaleDateString("pt-BR", {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+    });
+
+    await db.execute(
+        `INSERT OR REPLACE INTO fichas_salvas (id, nome, data_atualizacao, dados_json) 
+         VALUES ($1, $2, $3, $4)`,
+        [id, nome, dataAtual, dadosJson]
+    );
+}
+
+export async function listarFichasDB() {
+    const db = await Database.load(DADOS);
+    return await db.select<{ id: string, nome: string, data_atualizacao: string }[]>(
+        "SELECT id, nome, data_atualizacao FROM fichas_salvas ORDER BY data_atualizacao DESC"
+    );
+}
+
+export async function obterFichaDB(id: string) {
+    const db = await Database.load(DADOS);
+    const result = await db.select<{ dados_json: string }[]>(
+        "SELECT dados_json FROM fichas_salvas WHERE id = $1",
+        [id]
+    );
+    return result.length > 0 ? result[0].dados_json : null;
+}
+
+export async function apagarFichaDB(id: string) {
+    const db = await Database.load(DADOS);
+    await db.execute("DELETE FROM fichas_salvas WHERE id = $1", [id]);
 }

@@ -5,15 +5,22 @@ import { buscarDadosTabela } from "../database/conexao";
 import { DadosNutricionais } from "../types/ficha";
 
 export default function SecaoNutricaoCustos() {
-  const { ingredientes, rendimento } = useFicha();
+  const {
+    ingredientes,
+    rendimento,
+    dadosExtras,
+    setDadosExtras,
+    baseExtras,
+    setBaseExtras,
+    setNutricaoECustos,
+  } = useFicha();
   const [bancoTabela, setBancoTabela] = useState<Record<string, any>>({});
   const [modoEdicao, setModoEdicao] = useState<"porcao" | "base100g">("porcao");
-  const [dadosExtras, setDadosExtras] = useState<
-    Record<string, Partial<DadosNutricionais>>
-  >({});
-  const [baseExtras, setBaseExtras] = useState<
-    Record<string, Partial<DadosNutricionais>>
-  >({});
+  const [celulaAtiva, setCelulaAtiva] = useState<{
+    id: string;
+    campo: string;
+    valor: string;
+  } | null>(null);
 
   useEffect(() => {
     buscarDadosTabela().then(setBancoTabela).catch(console.error);
@@ -80,6 +87,36 @@ export default function SecaoNutricaoCustos() {
     return (valorBase / 100) * perCapitaLiquido;
   };
 
+  useEffect(() => {
+    const dadosExportacao = ingredientes.map((ing) => ({
+      id: ing.id,
+      nome: ing.nome,
+      perCapitaBruto: obterValorPorcao(ing, "perCapitaBruto"),
+      precoUnitario: obterValorBase(ing, "precoUnitario"),
+      custoUnitario: obterValorPorcao(ing, "custoUnitario"),
+      perCapitaLiquido: obterValorPorcao(ing, "perCapitaLiquido"),
+      energia: obterValorPorcao(ing, "energia"),
+      carboidratos: obterValorPorcao(ing, "carboidratos"),
+      proteinas: obterValorPorcao(ing, "proteinas"),
+      lipideos: obterValorPorcao(ing, "lipideos"),
+      lipideosSaturados: obterValorPorcao(ing, "lipideosSaturados"),
+      sodio: obterValorPorcao(ing, "sodio"),
+      fibra: obterValorPorcao(ing, "fibra"),
+    }));
+
+    setNutricaoECustos((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(dadosExportacao)) return prev;
+      return dadosExportacao;
+    });
+  }, [
+    ingredientes,
+    rendimento,
+    dadosExtras,
+    baseExtras,
+    bancoTabela,
+    setNutricaoECustos,
+  ]);
+
   const calcularTotal = (campo: string) => {
     return ingredientes.reduce(
       (acc, ing) => acc + (Number(obterValorPorcao(ing, campo)) || 0),
@@ -95,8 +132,7 @@ export default function SecaoNutricaoCustos() {
   };
 
   const formatarNumero = (valorString: string) => {
-    const apenasNumeros = valorString.replace(/\D/g, "");
-    return Number(apenasNumeros) / 100;
+    return Number(valorString.replace(/\D/g, "")) / 100;
   };
 
   const inputBaseClass =
@@ -141,27 +177,27 @@ export default function SecaoNutricaoCustos() {
                 Ingrediente
               </th>
               <th className="p-1 text-center border-b border-zinc-200 dark:border-zinc-800 w-16">
-                <span className="block">{"P.C.B"}</span>
+                <span className="block">P.C.B</span>
                 <span className="text-[8px] font-normal opacity-70 lowercase italic">
-                  {"(g)"}
+                  (g)
                 </span>
               </th>
               <th className="p-1 text-center border-b border-zinc-200 dark:border-zinc-800 w-24">
-                <span className="block">{"Preço"}</span>
+                <span className="block">Preço</span>
                 <span className="text-[8px] font-normal opacity-70 italic">
-                  {"(R$)"}
+                  (R$)
                 </span>
               </th>
               <th className="p-1 text-center border-b border-zinc-200 dark:border-zinc-800 w-20">
-                <span className="block">{"Custo"}</span>
+                <span className="block">Custo</span>
                 <span className="text-[8px] font-normal opacity-70 italic">
-                  {"(R$)"}
+                  (R$)
                 </span>
               </th>
               <th className="p-1 text-center border-b border-zinc-200 dark:border-zinc-800 w-16">
-                <span className="block">{"P.C.L"}</span>
+                <span className="block">P.C.L</span>
                 <span className="text-[8px] font-normal opacity-70 lowercase italic">
-                  {"(g)"}
+                  (g)
                 </span>
               </th>
               {[
@@ -211,7 +247,6 @@ export default function SecaoNutricaoCustos() {
                           .toFixed(2)
                           .replace(".", ",")}
                   </td>
-
                   <td className="p-1">
                     <div className="relative flex items-center">
                       <span className="absolute left-2 text-zinc-400 text-[9px] pointer-events-none mt-px">
@@ -236,7 +271,6 @@ export default function SecaoNutricaoCustos() {
                       />
                     </div>
                   </td>
-
                   <td className="p-1 font-bold">
                     {exibindoBase ? (
                       <div className="text-center">-</div>
@@ -251,7 +285,6 @@ export default function SecaoNutricaoCustos() {
                       </div>
                     )}
                   </td>
-
                   <td className="p-1 text-center text-zinc-500">
                     {exibindoBase
                       ? "-"
@@ -278,26 +311,45 @@ export default function SecaoNutricaoCustos() {
                         undefined
                       : dadosExtras[ing.id]?.[c as keyof DadosNutricionais] !==
                         undefined;
+                    const isAtiva =
+                      celulaAtiva?.id === ing.id && celulaAtiva?.campo === c;
+                    const valorExibicao = isAtiva
+                      ? celulaAtiva.valor
+                      : (Number(vFinal) || 0).toFixed(2);
                     return (
                       <td key={c} className="p-0.5">
                         <input
                           type="number"
-                          value={vFinal ? vFinal.toFixed(2) : "0.00"}
-                          title={`Valor original (100g): ${vBase.toFixed(2)}`}
                           step="0.01"
-                          onChange={(e) =>
+                          value={valorExibicao}
+                          title={`Valor original (100g): ${vBase.toFixed(2)}`}
+                          onFocus={() => {
+                            setCelulaAtiva({
+                              id: ing.id,
+                              campo: c,
+                              valor: vFinal ? String(vFinal) : "",
+                            });
+                          }}
+                          onChange={(e) => {
+                            setCelulaAtiva({
+                              id: ing.id,
+                              campo: c,
+                              valor: e.target.value,
+                            });
                             lidarComMudanca(
                               ing.id,
                               c as any,
-                              Number(e.target.value),
-                            )
-                          }
+                              e.target.value === ""
+                                ? 0
+                                : Number(e.target.value),
+                            );
+                          }}
+                          onBlur={() => setCelulaAtiva(null)}
                           className={`${inputBaseClass} text-center ${editado ? "text-indigo-600 font-bold bg-indigo-50 dark:bg-indigo-900/20" : ""}`}
                         />
                       </td>
                     );
                   })}
-
                   <td className="p-1 text-center">
                     <button
                       onClick={() => resetarLinha(ing.id)}
@@ -311,7 +363,6 @@ export default function SecaoNutricaoCustos() {
               );
             })}
           </tbody>
-
           <tfoot className="bg-zinc-200/50 dark:bg-zinc-800/50 font-black sticky bottom-0 text-[11px] backdrop-blur-sm">
             <tr>
               <td className="p-2 uppercase text-[9px] text-zinc-700 dark:text-zinc-300">
