@@ -3,6 +3,7 @@ import {
   Ingrediente,
   DadosRendimento,
   InformacoesGerais,
+  DadosNutricionais,
 } from "../types/ficha";
 
 interface FichaContextType {
@@ -14,6 +15,8 @@ interface FichaContextType {
   setInformacoesGerais: React.Dispatch<React.SetStateAction<InformacoesGerais>>;
   tecnicaPreparo: string;
   setTecnicaPreparo: React.Dispatch<React.SetStateAction<string>>;
+  nutricaoECustos: DadosNutricionais[];
+  setNutricaoECustos: React.Dispatch<React.SetStateAction<DadosNutricionais[]>>;
 }
 
 const FichaContext = createContext<FichaContextType | undefined>(undefined);
@@ -40,15 +43,32 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
   const [rendimento, setRendimento] = useState<DadosRendimento>({
     equipamentos: "",
     tempoPreparo: "",
-    fatorCoccao: "",
-    pesoTotal: "",
-    rendimentoPorcoes: "",
-    pesoPorcao: "",
+    fatorCoccao: 0,
+    pesoTotal: 0,
+    rendimentoPorcoes: 0,
+    pesoPorcao: 0,
     medidaCaseiraPorcao: "",
     historico: [],
   });
 
   const [tecnicaPreparo, setTecnicaPreparo] = useState("");
+  const [nutricaoECustos, setNutricaoECustos] = useState<DadosNutricionais[]>([
+    {
+      id: crypto.randomUUID(),
+      nome: "",
+      perCapitaBruto: 0,
+      precoUnitario: 0,
+      custoUnitario: 0,
+      perCapitaLiquido: 0,
+      energia: 0,
+      carboidratos: 0,
+      proteinas: 0,
+      lipideos: 0,
+      lipideosSaturados: 0,
+      sodio: 0,
+      fibra: 0,
+    },
+  ]);
 
   return (
     <FichaContext.Provider
@@ -61,6 +81,8 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
         setInformacoesGerais,
         tecnicaPreparo,
         setTecnicaPreparo,
+        nutricaoECustos,
+        setNutricaoECustos,
       }}
     >
       {children}

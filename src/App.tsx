@@ -1,14 +1,22 @@
-import { useState, useEffect } from "react";
-import { Sun, Moon } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Sun, Moon, Printer } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
 import { FichaProvider } from "./contexts/FichaContext";
 import { iniciarBancoDeDados } from "./database/conexao";
 import CabecalhoFicha from "./components/CabecalhoFicha";
+import FichaImpressao from "./components/FichaImpressao";
 import SecaoIngredientes from "./components/SecaoIngredientesPreparo";
 import SecaoPreparo from "./components/SecaoRendimentoEquipamentos";
 import SecaoNutricaoCustos from "./components/SecaoNutricaoCustos";
 
 function App() {
   const [temaEscuro, setTemaEscuro] = useState(true);
+  const componenteParaImpressaoRef = useRef<HTMLDivElement>(null);
+
+  const lidarComImpressao = useReactToPrint({
+    contentRef: componenteParaImpressaoRef,
+    documentTitle: "Ficha_Tecnica_Preparo",
+  });
 
   useEffect(() => {
     if (temaEscuro) {
@@ -36,20 +44,28 @@ function App() {
               </p>
             </div>
 
-            <button
-              onClick={() => setTemaEscuro(!temaEscuro)}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg shadow-sm transition-all text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-            >
-              {temaEscuro ? (
-                <>
-                  <Sun size={18} /> Modo Claro
-                </>
-              ) : (
-                <>
-                  <Moon size={18} /> Modo Escuro
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => lidarComImpressao()}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-all text-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 outline-none"
+              >
+                <Printer size={18} /> Exportar PDF
+              </button>
+              <button
+                onClick={() => setTemaEscuro(!temaEscuro)}
+                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg shadow-sm transition-all text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              >
+                {temaEscuro ? (
+                  <>
+                    <Sun size={18} /> Modo Claro
+                  </>
+                ) : (
+                  <>
+                    <Moon size={18} /> Modo Escuro
+                  </>
+                )}
+              </button>
+            </div>
           </header>
 
           <main className="space-y-8">
@@ -63,6 +79,10 @@ function App() {
             &copy; {new Date().getFullYear()} - Gestor de Fichas Técnicas
           </footer>
         </div>
+      </div>
+
+      <div className="hidden print:block">
+        <FichaImpressao ref={componenteParaImpressaoRef} />
       </div>
     </FichaProvider>
   );
