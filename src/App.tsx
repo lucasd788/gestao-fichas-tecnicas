@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
+import { Sun, Moon } from "lucide-react";
+import { FichaProvider } from "./contexts/FichaContext";
+import { iniciarBancoDeDados } from "./database/conexao";
 import CabecalhoFicha from "./components/CabecalhoFicha";
 import SecaoIngredientes from "./components/SecaoIngredientesPreparo";
 import SecaoPreparo from "./components/SecaoRendimentoEquipamentos";
 import SecaoNutricaoCustos from "./components/SecaoNutricaoCustos";
 
 function App() {
-  const [temaEscuro, setTemaEscuro] = useState(false);
+  const [temaEscuro, setTemaEscuro] = useState(true);
 
   useEffect(() => {
     if (temaEscuro) {
@@ -15,34 +18,53 @@ function App() {
     }
   }, [temaEscuro]);
 
-  return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans py-10 px-4 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-10 text-center flex flex-col items-center">
-          <h1 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100">
-            Ficha Técnica de Preparo
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2 mb-6">
-            gestao-fichas-tecnicas
-          </p>
+  useEffect(() => {
+    iniciarBancoDeDados().catch(console.error);
+  }, []);
 
-          <button
-            onClick={() => setTemaEscuro(!temaEscuro)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow transition-colors"
-          >
-            {temaEscuro
-              ? "Mudar para Tema Claro ☀️"
-              : "Mudar para Tema Escuro 🌙"}
-          </button>
-        </header>
-        <main>
-          <CabecalhoFicha />
-          <SecaoIngredientes />
-          <SecaoPreparo />
-          <SecaoNutricaoCustos />
-        </main>
+  return (
+    <FichaProvider>
+      <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans py-8 px-4 transition-colors duration-300">
+        <div className="w-full max-w-[96%] xl:max-w-[1400px] 2xl:max-w-[1600px] mx-auto">
+          <header className="mb-8 flex justify-between items-center border-b border-zinc-300 dark:border-zinc-800 pb-6">
+            <div className="text-left">
+              <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
+                Ficha Técnica de Preparo
+              </h1>
+              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mt-1">
+                Planeamento, Nutrição e Custos
+              </p>
+            </div>
+
+            <button
+              onClick={() => setTemaEscuro(!temaEscuro)}
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg shadow-sm transition-all text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+            >
+              {temaEscuro ? (
+                <>
+                  <Sun size={18} /> Modo Claro
+                </>
+              ) : (
+                <>
+                  <Moon size={18} /> Modo Escuro
+                </>
+              )}
+            </button>
+          </header>
+
+          <main className="space-y-8">
+            <CabecalhoFicha />
+            <SecaoIngredientes />
+            <SecaoPreparo />
+            <SecaoNutricaoCustos />
+          </main>
+
+          <footer className="mt-12 text-center text-zinc-500 dark:text-zinc-500 text-sm font-medium pb-10">
+            &copy; {new Date().getFullYear()} - Gestor de Fichas Técnicas
+          </footer>
+        </div>
       </div>
-    </div>
+    </FichaProvider>
   );
 }
 

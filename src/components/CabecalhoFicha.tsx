@@ -16,45 +16,45 @@ export default function CabecalhoFicha() {
   };
 
   const estiloInput =
-    "w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors";
+    "w-full p-2 rounded bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-xs shadow-sm hover:border-zinc-400 dark:hover:border-zinc-600";
   const estiloLabel =
-    "text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1";
+    "text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider mb-1 ml-1 block";
 
   return (
-    <section className="bg-white dark:bg-gray-800 p-6 shadow-md rounded-md mb-6 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+    <section className="bg-white dark:bg-zinc-900 p-4 shadow-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 transition-colors duration-300">
+      <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4 border-l-4 border-indigo-500 pl-3">
         Informações Gerais
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex flex-col">
-          <label className={estiloLabel}>Alunos:</label>
-          <input
-            type="text"
-            name="alunos"
-            value={cabecalho.alunos}
-            onChange={lidarComMudanca}
-            className={estiloInput}
-          />
-        </div>
-        <div />
-
-        <div className="flex flex-col">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
           <label className={estiloLabel}>Preparação:</label>
           <input
             type="text"
             name="preparacao"
+            placeholder="Ex: Bolo de Cenoura com Chocolate"
             value={cabecalho.preparacao}
             onChange={lidarComMudanca}
             className={estiloInput}
           />
         </div>
-
-        <div className="flex flex-col">
+        <div>
           <label className={estiloLabel}>Categoria:</label>
           <input
             type="text"
             name="categoria"
+            placeholder="Ex: Sobremesa, Prato Principal..."
             value={cabecalho.categoria}
+            onChange={lidarComMudanca}
+            className={estiloInput}
+          />
+        </div>
+        <div>
+          <label className={estiloLabel}>Alunos / Clientes:</label>
+          <input
+            type="text"
+            name="alunos"
+            placeholder="Ex: Turma A, Evento Corporativo..."
+            value={cabecalho.alunos}
             onChange={lidarComMudanca}
             className={estiloInput}
           />

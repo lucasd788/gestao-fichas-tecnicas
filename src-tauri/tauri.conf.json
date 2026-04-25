@@ -13,8 +13,11 @@
     "windows": [
       {
         "title": "gestao-fichas-tecnicas",
-        "width": 800,
-        "height": 600
+        "width": 1400,
+        "height": 700,
+        "resizable": true,
+        "center": true,
+        "fullscreen": false
       }
     ],
     "security": {

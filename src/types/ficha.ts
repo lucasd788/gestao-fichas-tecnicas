@@ -36,6 +36,7 @@ export interface DadosRendimento {
     rendimentoPorcoes: number | "";
     pesoPorcao: number | "";
     medidaCaseiraPorcao: string;
+    historico?: string[];
 }
 
 export interface FichaTecnicaCompleta {
