@@ -3,10 +3,11 @@ import { FileText, Save, Plus, Trash2, ChevronLeft, Menu } from "lucide-react";
 import { useFicha } from "../contexts/FichaContext";
 import {
   listarFichasDB,
-  guardarFichaDB,
+  salvarFichaDB,
   obterFichaDB,
   apagarFichaDB,
 } from "../database/conexao";
+import { toast } from "sonner";
 
 interface FichaSalva {
   id: string;
@@ -47,13 +48,13 @@ export default function Sidebar() {
           : "Ficha Sem Nome";
       const json = JSON.stringify(dados);
 
-      await guardarFichaDB(dados.id, nomeFicha, json);
+      await salvarFichaDB(dados.id, nomeFicha, json);
       await carregarLista();
 
-      alert("Ficha guardada com sucesso!");
+      toast.success("Ficha salva");
     } catch (error) {
-      console.error("Erro ao guardar a ficha:", error);
-      alert("Ocorreu um erro ao guardar a ficha.");
+      console.error("Erro ao salvar a ficha:", error);
+      toast.error("Erro ao salvar a ficha");
     }
   };
 
@@ -66,6 +67,7 @@ export default function Sidebar() {
       }
     } catch (error) {
       console.error("Erro ao carregar a ficha:", error);
+      toast.error("Erro ao carregar a ficha");
     }
   };
 
@@ -84,8 +86,10 @@ export default function Sidebar() {
         if (id === fichaId) {
           limparFicha();
         }
+        toast.success("Ficha apagada");
       } catch (error) {
         console.error("Erro ao apagar a ficha:", error);
+        toast.error("Erro ao apagar a ficha");
       }
     }
   };
@@ -154,7 +158,7 @@ export default function Sidebar() {
         {fichasSalvas.length === 0
           ? expandido && (
               <p className="text-xs text-zinc-400 dark:text-zinc-500 px-2 italic">
-                Nenhuma ficha guardada.
+                Nenhuma ficha salva.
               </p>
             )
           : fichasSalvas.map((ficha) => (

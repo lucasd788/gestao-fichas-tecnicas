@@ -7,6 +7,7 @@ import {
   apagarIngredienteCustomizado,
 } from "../database/conexao";
 import { DadosNutricionais } from "../types/ficha";
+import { toast } from "sonner";
 
 const CAMPOS_NUTRICIONAIS: (keyof DadosNutricionais)[] = [
   "energia",
@@ -181,7 +182,7 @@ export default function SecaoNutricaoCustos() {
       (campo) => dadosParaSalvar[campo] > 0,
     );
     if (!temDados) {
-      alert("Preencha pelo menos um valor nutricional.");
+      toast.warning("Preencha pelo menos um valor nutricional");
       return;
     }
 
@@ -205,9 +206,10 @@ export default function SecaoNutricaoCustos() {
       setBaseExtras((prev) => limparApenasNutrientes(prev));
       setDadosExtras((prev) => limparApenasNutrientes(prev));
 
-      console.log("Ingrediente sincronizado com sucesso.");
+      toast.success(`Ingrediente "${ing.nome}" salvo no banco de dados`);
     } catch (error) {
-      console.error("Erro ao guardar ingrediente:", error);
+      console.error("Erro ao salvar ingrediente:", error);
+      toast.error("Erro ao salvar o ingrediente");
     }
   };
 
@@ -245,9 +247,12 @@ export default function SecaoNutricaoCustos() {
           setBaseExtras((prev) => ({ ...prev, [ing.id]: novosValoresBase }));
           setDadosExtras((prev) => ({ ...prev, [ing.id]: novosValoresPorcao }));
         }
+        toast.info(
+          `"${nome}" removido da base de dados. Valores revertidos para manual`,
+        );
       } catch (error) {
         console.error("Erro ao apagar ingrediente:", error);
-        alert("Erro ao apagar o ingrediente.");
+        toast.error("Erro ao apagar o ingrediente");
       }
     }
   };
@@ -354,7 +359,7 @@ export default function SecaoNutricaoCustos() {
                           <button
                             onClick={() => lidarComSalvarIngrediente(ing)}
                             className="text-indigo-500 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-500/10 p-1 rounded-md"
-                            title="Guardar na Base de Dados"
+                            title="Salvar na Base de Dados"
                           >
                             <Save size={10} />
                           </button>
@@ -531,7 +536,7 @@ export default function SecaoNutricaoCustos() {
       <div className="text-left">
         <span className="text-[10px] text-zinc-500 dark:text-zinc-500 italic">
           * Dados nutricionais retirados da tabela TBCA e dos ingredientes
-          personalizados guardados localmente.
+          personalizados salvos localmente.
         </span>
       </div>
     </section>

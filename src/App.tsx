@@ -9,6 +9,7 @@ import SecaoPreparo from "./components/SecaoRendimentoEquipamentos";
 import SecaoNutricaoCustos from "./components/SecaoNutricaoCustos";
 import FichaImpressao from "./components/FichaImpressao";
 import Sidebar from "./components/Sidebar";
+import { Toaster } from "sonner";
 
 function App() {
   const [temaEscuro, setTemaEscuro] = useState(true);
@@ -53,6 +54,12 @@ function App() {
 
   return (
     <FichaProvider>
+      <Toaster
+        theme={temaEscuro ? "dark" : "light"}
+        richColors
+        position="top-right"
+      />
+
       <div className="flex h-screen bg-zinc-100 dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
         <div className="print:hidden h-full">
           <Sidebar />

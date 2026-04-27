@@ -1,10 +1,18 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useRef,
+} from "react";
 import {
   Ingrediente,
   DadosRendimento,
   InformacoesGerais,
   DadosNutricionais,
 } from "../types/ficha";
+import { salvarFichaDB } from "../database/conexao";
 
 interface FichaContextType {
   fichaId: string;
@@ -70,6 +78,49 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
     Record<string, Partial<DadosNutricionais>>
   >({});
 
+  const ultimaSalvaRef = useRef<string>("");
+  const estadoAtualRef = useRef<string>("");
+
+  useEffect(() => {
+    const dados = obterFichaAtualParaSalvar();
+    estadoAtualRef.current = JSON.stringify(dados);
+  }, [
+    fichaId,
+    informacoesGerais,
+    ingredientes,
+    rendimento,
+    tecnicaPreparo,
+    nutricaoECustos,
+    dadosExtras,
+    baseExtras,
+  ]);
+
+  useEffect(() => {
+    if (!fichaId) return;
+    const timer = setInterval(async () => {
+      const jsonAtual = estadoAtualRef.current;
+
+      if (jsonAtual !== "" && jsonAtual !== ultimaSalvaRef.current) {
+        try {
+          const dados = JSON.parse(jsonAtual);
+          const nomeFicha =
+            dados.informacoesGerais.preparacao.trim() !== ""
+              ? dados.informacoesGerais.preparacao
+              : "Ficha Sem Nome";
+
+          await salvarFichaDB(fichaId, nomeFicha, jsonAtual);
+          ultimaSalvaRef.current = jsonAtual;
+
+          console.log(`[Auto-save] "${nomeFicha}" salva.`);
+        } catch (error) {
+          console.error("Erro no auto-save:", error);
+        }
+      }
+    }, 30000);
+
+    return () => clearInterval(timer);
+  }, [fichaId]);
+
   const limparFicha = () => {
     setFichaId(crypto.randomUUID());
     setInformacoesGerais({ alunos: "", preparacao: "", categoria: "" });
@@ -96,6 +147,9 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
     setNutricaoECustos([]);
     setDadosExtras({});
     setBaseExtras({});
+
+    ultimaSalvaRef.current = "";
+    estadoAtualRef.current = "";
   };
 
   const carregarFichaSalva = (dados: any) => {
@@ -120,6 +174,10 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
     setNutricaoECustos(dados.nutricaoECustos || []);
     setDadosExtras(dados.dadosExtras || {});
     setBaseExtras(dados.baseExtras || {});
+
+    const json = JSON.stringify(dados);
+    ultimaSalvaRef.current = json;
+    estadoAtualRef.current = json;
   };
 
   const obterFichaAtualParaSalvar = () => {
