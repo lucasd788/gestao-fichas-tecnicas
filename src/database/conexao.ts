@@ -24,6 +24,20 @@ export async function iniciarBancoDeDados() {
         `);
 
         await db.execute(`
+        CREATE TABLE IF NOT EXISTS ingredientes_customizados (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT UNIQUE NOT NULL,
+        energia REAL DEFAULT 0,
+        carboidratos REAL DEFAULT 0,
+        proteinas REAL DEFAULT 0,
+        lipideos REAL DEFAULT 0,
+        lipideosSaturados REAL DEFAULT 0,
+        sodio REAL DEFAULT 0,
+        fibra REAL DEFAULT 0
+        );
+        `);
+
+        await db.execute(`
         CREATE TABLE IF NOT EXISTS fichas_salvas (
         id TEXT PRIMARY KEY,
         nome TEXT NOT NULL,
@@ -86,12 +100,46 @@ export async function buscarNomesIngredientes(): Promise<{ nome: string, codigo:
 
 export async function buscarDadosTabela(): Promise<Record<string, any>> {
     const db = await Database.load(DADOS);
-    const resultados = await db.select<any[]>("SELECT * FROM ingredientes_tabela");
+    const resultadosOficiais = await db.select<any[]>("SELECT * FROM ingredientes_tabela");
+    const resultadosCustom = await db.select<any[]>("SELECT * FROM ingredientes_customizados");
     const mapa: Record<string, any> = {};
-    for (const item of resultados) {
+    for (const item of resultadosOficiais) {
         mapa[item.nome] = item;
     }
+
+    for (const item of resultadosCustom) {
+        mapa[item.nome] = { ...item, isCustom: true };
+    }
+
     return mapa;
+}
+
+export async function salvarIngredienteCustomizado(ingrediente: any) {
+    const db = await Database.load(DADOS);
+
+    await db.execute(
+        `INSERT OR REPLACE INTO ingredientes_customizados 
+        (nome, energia, carboidratos, proteinas, lipideos, lipideosSaturados, sodio, fibra) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+            ingrediente.nome,
+            ingrediente.energia || 0,
+            ingrediente.carboidratos || 0,
+            ingrediente.proteinas || 0,
+            ingrediente.lipideos || 0,
+            ingrediente.lipideosSaturados || 0,
+            ingrediente.sodio || 0,
+            ingrediente.fibra || 0
+        ]
+    );
+}
+export async function apagarIngredienteCustomizado(nome: string) {
+    const db = await Database.load(DADOS);
+
+    await db.execute(
+        "DELETE FROM ingredientes_customizados WHERE nome = $1",
+        [nome]
+    );
 }
 
 export async function guardarFichaDB(id: string, nome: string, dadosJson: string) {
@@ -102,7 +150,7 @@ export async function guardarFichaDB(id: string, nome: string, dadosJson: string
 
     await db.execute(
         `INSERT OR REPLACE INTO fichas_salvas (id, nome, data_atualizacao, dados_json) 
-         VALUES ($1, $2, $3, $4)`,
+        VALUES ($1, $2, $3, $4)`,
         [id, nome, dataAtual, dadosJson]
     );
 }

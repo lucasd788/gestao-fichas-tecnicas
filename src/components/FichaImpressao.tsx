@@ -40,16 +40,16 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
   return (
     <div
       ref={ref}
-      className="bg-white text-black w-[297mm] min-h-[210mm] p-10 mx-auto text-[11px] leading-tight font-sans"
+      className="bg-white text-black w-[297mm] min-h-[210mm] mx-auto text-[11px] leading-tight font-sans"
     >
       <style
         dangerouslySetInnerHTML={{
           __html: `
-        @media print {
-        @page { size: landscape; margin: 10mm; }
-        body { -webkit-print-color-adjust: exact; }
-        }
-        `,
+      @media print {
+      @page { size: landscape; margin: 10mm; }
+      body { -webkit-print-color-adjust: exact; }
+      }
+      `,
         }}
       />
       <div className="break-after-page min-h-[190mm] flex flex-col">
@@ -72,7 +72,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
           </div>
         </div>
 
-        <table className="w-full border-collapse border border-black mb-6 text-center text-[10px]">
+        <table className="w-full table-fixed border-collapse border border-black mb-6 text-center text-[10px]">
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-black p-2 font-bold w-[23%] leading-none">
@@ -102,10 +102,10 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                 <br />
                 líquido (g)
               </th>
-              <th className="border border-black p-2 font-bold w-[16%] leading-none">
+              <th className="border border-black p-2 font-bold w-[14%] leading-none">
                 Medida Caseira
               </th>
-              <th className="border border-black p-2 font-bold w-[28%] leading-none">
+              <th className="border border-black p-2 font-bold w-[30%] leading-none">
                 Técnica de Preparo
               </th>
             </tr>
@@ -116,7 +116,9 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
               const nutri = nutricaoECustos[i] as DadosNutricionais | undefined;
               const fc =
                 ing && ing.pesoLiquido > 0
-                  ? (ing.pesoBruto / ing.pesoLiquido).toFixed(2)
+                  ? (ing.pesoBruto / ing.pesoLiquido)
+                      .toFixed(2)
+                      .replace(".", ",")
                   : "";
 
               return (
@@ -125,17 +127,17 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                     {ing?.nome || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {ing?.pesoBruto.toFixed(2) || ""}
+                    {ing?.pesoBruto.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {ing?.pesoLiquido.toFixed(2) || ""}
+                    {ing?.pesoLiquido.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">{fc}</td>
                   <td className="border border-black p-1">
-                    {nutri?.perCapitaBruto.toFixed(2) || ""}
+                    {nutri?.perCapitaBruto.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.perCapitaLiquido.toFixed(2) || ""}
+                    {nutri?.perCapitaLiquido.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1 text-left px-3">
                     {ing?.medidaCaseira || ""}
@@ -157,7 +159,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
           </tbody>
         </table>
 
-        <div className="grid grid-cols-2 border border-black p-4 mt-auto text-xs">
+        <div className="grid grid-cols-[40%_60%] border border-black p-4 mt-auto text-xs">
           <div className="space-y-4">
             <div>
               <span className="font-bold">Tempo de preparo:</span>{" "}
@@ -200,7 +202,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
           Ficha Técnica de Preparo (Verso)
         </h2>
 
-        <table className="w-full border-collapse border border-black mb-6 text-center text-[10px]">
+        <table className="w-full table-fixed border-collapse border border-black mb-1 text-center text-[10px]">
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-black p-2 font-bold w-[23%] leading-none">
@@ -280,37 +282,38 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                     {nutri?.nome || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.perCapitaBruto.toFixed(2) || ""}
+                    {nutri?.perCapitaBruto.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.precoUnitario.toFixed(2) || ""}
+                    {nutri?.precoUnitario.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.custoUnitario.toFixed(2) || ""}
+                    {nutri?.custoUnitario.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.perCapitaLiquido.toFixed(2) || ""}
+                    {nutri?.perCapitaLiquido.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.energia.toFixed(2) || ""}
+                    {nutri?.energia.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.carboidratos.toFixed(2) || ""}
+                    {nutri?.carboidratos.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.proteinas.toFixed(2) || ""}
+                    {nutri?.proteinas.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.lipideos.toFixed(2) || ""}
+                    {nutri?.lipideos.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.lipideosSaturados.toFixed(2) || ""}
+                    {nutri?.lipideosSaturados.toFixed(2).replace(".", ",") ||
+                      ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.sodio.toFixed(2) || ""}
+                    {nutri?.sodio.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1">
-                    {nutri?.fibra.toFixed(2) || ""}
+                    {nutri?.fibra.toFixed(2).replace(".", ",") || ""}
                   </td>
                 </tr>
               );
@@ -320,33 +323,39 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
               <td className="border border-black p-2">- - - -</td>
               <td className="border border-black p-2">- - - -</td>
               <td className="border border-black p-2">
-                {totais.custo.toFixed(2)}
+                {totais.custo.toFixed(2).replace(".", ",")}
               </td>
               <td className="border border-black p-2">- - - -</td>
               <td className="border border-black p-2">
-                {totais.energia.toFixed(2)}
+                {totais.energia.toFixed(2).replace(".", ",")}
               </td>
               <td className="border border-black p-2">
-                {totais.carb.toFixed(2)}
+                {totais.carb.toFixed(2).replace(".", ",")}
               </td>
               <td className="border border-black p-2">
-                {totais.prot.toFixed(2)}
+                {totais.prot.toFixed(2).replace(".", ",")}
               </td>
               <td className="border border-black p-2">
-                {totais.lip.toFixed(2)}
+                {totais.lip.toFixed(2).replace(".", ",")}
               </td>
               <td className="border border-black p-2">
-                {totais.sat.toFixed(2)}
+                {totais.sat.toFixed(2).replace(".", ",")}
               </td>
               <td className="border border-black p-2">
-                {totais.sodio.toFixed(2)}
+                {totais.sodio.toFixed(2).replace(".", ",")}
               </td>
               <td className="border border-black p-2">
-                {totais.fibra.toFixed(2)}
+                {totais.fibra.toFixed(2).replace(".", ",")}
               </td>
             </tr>
           </tbody>
         </table>
+
+        <div className="text-left">
+          <span className="text-[10px] text-zinc-500 dark:text-zinc-500 italic">
+            * Dados nutricionais retirados da tabela TBCA
+          </span>
+        </div>
       </div>
     </div>
   );

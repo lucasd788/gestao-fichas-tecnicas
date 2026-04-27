@@ -1,8 +1,22 @@
 import { useState, useEffect } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Save, Trash2 } from "lucide-react";
 import { useFicha } from "../contexts/FichaContext";
-import { buscarDadosTabela } from "../database/conexao";
+import {
+  buscarDadosTabela,
+  salvarIngredienteCustomizado,
+  apagarIngredienteCustomizado,
+} from "../database/conexao";
 import { DadosNutricionais } from "../types/ficha";
+
+const CAMPOS_NUTRICIONAIS: (keyof DadosNutricionais)[] = [
+  "energia",
+  "carboidratos",
+  "proteinas",
+  "lipideos",
+  "lipideosSaturados",
+  "sodio",
+  "fibra",
+];
 
 export default function SecaoNutricaoCustos() {
   const {
@@ -48,13 +62,21 @@ export default function SecaoNutricaoCustos() {
     if (modoEdicao === "base100g") {
       setBaseExtras((prev) => {
         const novo = { ...prev };
-        delete novo[id];
+        if (novo[id] && novo[id].precoUnitario !== undefined) {
+          novo[id] = { precoUnitario: novo[id].precoUnitario } as any;
+        } else {
+          delete novo[id];
+        }
         return novo;
       });
     } else {
       setDadosExtras((prev) => {
         const novo = { ...prev };
-        delete novo[id];
+        if (novo[id] && novo[id].precoUnitario !== undefined) {
+          novo[id] = { precoUnitario: novo[id].precoUnitario } as any;
+        } else {
+          delete novo[id];
+        }
         return novo;
       });
     }
@@ -133,6 +155,101 @@ export default function SecaoNutricaoCustos() {
 
   const formatarNumero = (valorString: string) => {
     return Number(valorString.replace(/\D/g, "")) / 100;
+  };
+
+  const lidarComSalvarIngrediente = async (ing: any) => {
+    const valoresBase = baseExtras[ing.id] || {};
+    const valoresPorcao = dadosExtras[ing.id] || {};
+
+    let dadosParaSalvar: any = {
+      nome: ing.nome,
+    };
+
+    if (modoEdicao === "base100g") {
+      CAMPOS_NUTRICIONAIS.forEach((campo) => {
+        dadosParaSalvar[campo] = Number(valoresBase[campo]) || 0;
+      });
+    } else {
+      const pesoPerCapita = obterValorPorcao(ing, "perCapitaLiquido") || 1;
+      CAMPOS_NUTRICIONAIS.forEach((campo) => {
+        const valorPorcao = Number(valoresPorcao[campo]) || 0;
+        dadosParaSalvar[campo] = (valorPorcao * 100) / pesoPerCapita;
+      });
+    }
+
+    const temDados = CAMPOS_NUTRICIONAIS.some(
+      (campo) => dadosParaSalvar[campo] > 0,
+    );
+    if (!temDados) {
+      alert("Preencha pelo menos um valor nutricional.");
+      return;
+    }
+
+    try {
+      await salvarIngredienteCustomizado(dadosParaSalvar);
+
+      setBancoTabela((prev) => ({
+        ...prev,
+        [ing.nome]: { ...dadosParaSalvar, isCustom: true },
+      }));
+
+      const limparApenasNutrientes = (prev: any) => {
+        if (!prev[ing.id]) return prev;
+        const novoObjeto = { ...prev[ing.id] };
+        CAMPOS_NUTRICIONAIS.forEach((campo) => {
+          delete novoObjeto[campo];
+        });
+        return { ...prev, [ing.id]: novoObjeto };
+      };
+
+      setBaseExtras((prev) => limparApenasNutrientes(prev));
+      setDadosExtras((prev) => limparApenasNutrientes(prev));
+
+      console.log("Ingrediente sincronizado com sucesso.");
+    } catch (error) {
+      console.error("Erro ao guardar ingrediente:", error);
+    }
+  };
+
+  const lidarComApagarIngrediente = async (ing: any) => {
+    const nome = ing.nome;
+
+    if (
+      confirm(
+        `Tem a certeza que deseja apagar "${nome}" da base de dados? Os valores vão ser mantidos apenas nesta ficha.`,
+      )
+    ) {
+      try {
+        const dadosDoBanco = bancoTabela[nome];
+        await apagarIngredienteCustomizado(nome);
+
+        setBancoTabela((prev) => {
+          const novoBanco = { ...prev };
+          delete novoBanco[nome];
+          return novoBanco;
+        });
+
+        if (dadosDoBanco) {
+          const pesoPerCapita = obterValorPorcao(ing, "perCapitaLiquido") || 0;
+          const fatorPorcao = pesoPerCapita / 100;
+
+          const novosValoresBase: any = { ...(baseExtras[ing.id] || {}) };
+          const novosValoresPorcao: any = { ...(dadosExtras[ing.id] || {}) };
+
+          CAMPOS_NUTRICIONAIS.forEach((campo) => {
+            const valorBase = Number(dadosDoBanco[campo]) || 0;
+            novosValoresBase[campo] = valorBase;
+            novosValoresPorcao[campo] = valorBase * fatorPorcao;
+          });
+
+          setBaseExtras((prev) => ({ ...prev, [ing.id]: novosValoresBase }));
+          setDadosExtras((prev) => ({ ...prev, [ing.id]: novosValoresPorcao }));
+        }
+      } catch (error) {
+        console.error("Erro ao apagar ingrediente:", error);
+        alert("Erro ao apagar o ingrediente.");
+      }
+    }
   };
 
   const inputBaseClass =
@@ -230,7 +347,29 @@ export default function SecaoNutricaoCustos() {
                   key={ing.id}
                   className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30 transition-colors group"
                 >
-                  <td className="px-2 py-1.5 font-semibold text-zinc-700 dark:text-zinc-300">
+                  <td className="p-2 font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
+                    {ing.nome && (
+                      <>
+                        {!bancoTabela[ing.nome] && (
+                          <button
+                            onClick={() => lidarComSalvarIngrediente(ing)}
+                            className="text-indigo-500 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-500/10 p-1 rounded-md"
+                            title="Guardar na Base de Dados"
+                          >
+                            <Save size={10} />
+                          </button>
+                        )}
+                        {bancoTabela[ing.nome]?.isCustom && (
+                          <button
+                            onClick={() => lidarComApagarIngrediente(ing)}
+                            className="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-400/10 p-1 rounded-md"
+                            title="Apagar da Base de Dados (reverter para manual)"
+                          >
+                            <Trash2 size={10} />
+                          </button>
+                        )}
+                      </>
+                    )}
                     <div className="truncate" title={ing.nome}>
                       {ing.nome || "---"}
                     </div>
@@ -293,29 +432,23 @@ export default function SecaoNutricaoCustos() {
                           .replace(".", ",")}
                   </td>
 
-                  {[
-                    "energia",
-                    "carboidratos",
-                    "proteinas",
-                    "lipideos",
-                    "lipideosSaturados",
-                    "sodio",
-                    "fibra",
-                  ].map((c) => {
+                  {CAMPOS_NUTRICIONAIS.map((c) => {
                     const vBase = obterValorBase(ing, c);
                     const vFinal = exibindoBase
                       ? vBase
                       : obterValorPorcao(ing, c);
-                    const editado = exibindoBase
-                      ? baseExtras[ing.id]?.[c as keyof DadosNutricionais] !==
-                        undefined
-                      : dadosExtras[ing.id]?.[c as keyof DadosNutricionais] !==
+                    const editado =
+                      baseExtras[ing.id]?.[c as keyof DadosNutricionais] !==
+                        undefined ||
+                      dadosExtras[ing.id]?.[c as keyof DadosNutricionais] !==
                         undefined;
+
                     const isAtiva =
                       celulaAtiva?.id === ing.id && celulaAtiva?.campo === c;
                     const valorExibicao = isAtiva
                       ? celulaAtiva.valor
                       : (Number(vFinal) || 0).toFixed(2);
+
                     return (
                       <td key={c} className="p-0.5">
                         <input
@@ -345,7 +478,11 @@ export default function SecaoNutricaoCustos() {
                             );
                           }}
                           onBlur={() => setCelulaAtiva(null)}
-                          className={`${inputBaseClass} text-center ${editado ? "text-indigo-600 font-bold bg-indigo-50 dark:bg-indigo-900/20" : ""}`}
+                          className={`${inputBaseClass} text-center ${
+                            editado
+                              ? "text-indigo-600 font-bold bg-indigo-50 dark:bg-indigo-900/20"
+                              : ""
+                          }`}
                         />
                       </td>
                     );
@@ -378,15 +515,7 @@ export default function SecaoNutricaoCustos() {
                 </div>
               </td>
               <td></td>
-              {[
-                "energia",
-                "carboidratos",
-                "proteinas",
-                "lipideos",
-                "lipideosSaturados",
-                "sodio",
-                "fibra",
-              ].map((c) => (
+              {CAMPOS_NUTRICIONAIS.map((c) => (
                 <td
                   key={`t-${c}`}
                   className="p-1 text-center text-zinc-800 dark:text-zinc-200"
@@ -398,6 +527,12 @@ export default function SecaoNutricaoCustos() {
             </tr>
           </tfoot>
         </table>
+      </div>
+      <div className="text-left">
+        <span className="text-[10px] text-zinc-500 dark:text-zinc-500 italic">
+          * Dados nutricionais retirados da tabela TBCA e dos ingredientes
+          personalizados guardados localmente.
+        </span>
       </div>
     </section>
   );
