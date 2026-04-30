@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Sun, Moon, Printer, Loader2 } from "lucide-react";
+import { Sun, Moon, Printer, Loader2, HelpCircle, Code } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 import { FichaProvider } from "./contexts/FichaContext";
 import { iniciarBancoDeDados } from "./database/conexao";
@@ -9,11 +9,13 @@ import SecaoPreparo from "./components/SecaoRendimentoEquipamentos";
 import SecaoNutricaoCustos from "./components/SecaoNutricaoCustos";
 import FichaImpressao from "./components/FichaImpressao";
 import Sidebar from "./components/Sidebar";
+import ModalAjuda from "./components/ModalAjuda";
 import { Toaster } from "sonner";
 
 function App() {
   const [temaEscuro, setTemaEscuro] = useState(true);
   const [bancoPronto, setBancoPronto] = useState(false);
+  const [modalAjudaAberto, setModalAjudaAberto] = useState(false);
   const componenteParaImpressaoRef = useRef<HTMLDivElement>(null);
 
   const lidarComImpressao = useReactToPrint({
@@ -59,12 +61,10 @@ function App() {
         richColors
         position="top-right"
       />
-
       <div className="flex h-screen bg-zinc-100 dark:bg-zinc-950 transition-colors duration-300 overflow-hidden">
         <div className="print:hidden h-full">
           <Sidebar />
         </div>
-
         <div className="flex-1 overflow-y-auto text-zinc-900 dark:text-zinc-100 font-sans p-8">
           <div className="w-full max-w-[96%] xl:max-w-[1400px] 2xl:max-w-[1600px] mx-auto">
             <header className="mb-8 flex justify-between items-center border-b border-zinc-300 dark:border-zinc-800 pb-6">
@@ -79,12 +79,19 @@ function App() {
 
               <div className="flex items-center gap-3 print:hidden">
                 <button
+                  onClick={() => setModalAjudaAberto(true)}
+                  className="flex items-center justify-center p-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium rounded-lg shadow-sm transition-all outline-none"
+                  title="Ajuda e Atalhos"
+                >
+                  <HelpCircle size={18} />
+                </button>
+
+                <button
                   onClick={() => lidarComImpressao()}
                   className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-all text-sm outline-none"
                 >
                   <Printer size={18} /> Exportar PDF
                 </button>
-
                 <button
                   onClick={() => setTemaEscuro(!temaEscuro)}
                   className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg shadow-sm transition-all text-sm outline-none"
@@ -109,8 +116,26 @@ function App() {
               <SecaoNutricaoCustos />
             </main>
 
-            <footer className="mt-12 text-center text-zinc-500 dark:text-zinc-500 text-sm font-medium pb-10">
-              &copy; {new Date().getFullYear()} - Gestor de Fichas Técnicas
+            <footer className="mt-16 pt-8 pb-2 border-t border-zinc-200 dark:border-zinc-800/60 flex flex-col items-center justify-center gap-3">
+              <p className="text-center text-zinc-500 dark:text-zinc-400 text-sm font-medium">
+                &copy; {new Date().getFullYear()} - Gestor de Fichas Técnicas
+              </p>
+
+              <div className="flex items-center gap-3 text-[11px] text-zinc-400 dark:text-zinc-500 font-mono">
+                <span className="flex items-center gap-1">
+                  Desenvolvido por
+                  <a
+                    href="https://github.com/lucasd788"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 font-bold text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ml-1"
+                    title="Visitar o meu perfil no GitHub"
+                  >
+                    <Code size={12} />
+                    Lucas Dias
+                  </a>
+                </span>
+              </div>
             </footer>
           </div>
         </div>
@@ -119,6 +144,11 @@ function App() {
       <div className="hidden print:block">
         <FichaImpressao ref={componenteParaImpressaoRef} />
       </div>
+
+      <ModalAjuda
+        aberto={modalAjudaAberto}
+        fecharModal={() => setModalAjudaAberto(false)}
+      />
     </FichaProvider>
   );
 }
