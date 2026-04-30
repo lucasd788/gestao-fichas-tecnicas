@@ -13,6 +13,7 @@ import {
   DadosNutricionais,
 } from "../types/ficha";
 import { salvarFichaDB } from "../database/conexao";
+import { toast } from "sonner";
 
 interface FichaContextType {
   fichaId: string;
@@ -38,6 +39,7 @@ interface FichaContextType {
   limparFicha: () => void;
   carregarFichaSalva: (dados: any) => void;
   obterFichaAtualParaSalvar: () => any;
+  salvarFichaManualmente: () => void;
 }
 
 const FichaContext = createContext<FichaContextType | undefined>(undefined);
@@ -80,6 +82,7 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
 
   const ultimaSalvaRef = useRef<string>("");
   const estadoAtualRef = useRef<string>("");
+  const estaSalvandoRef = useRef<boolean>(false);
 
   useEffect(() => {
     const dados = obterFichaAtualParaSalvar();
@@ -95,31 +98,82 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
     baseExtras,
   ]);
 
+  const salvarFichaAuto = async (mostrarAvisoVisual = false) => {
+    if (estaSalvandoRef.current) return;
+
+    const jsonAtual = estadoAtualRef.current;
+
+    if (jsonAtual === ultimaSalvaRef.current) {
+      if (mostrarAvisoVisual) toast.info("A ficha já está salva");
+      return;
+    }
+
+    if (jsonAtual !== "") {
+      const dados = JSON.parse(jsonAtual);
+      const temNome = dados.informacoesGerais.preparacao.trim() !== "";
+      const temIngredientes = dados.ingredientes.some(
+        (i: any) => i.nome.trim() !== "",
+      );
+
+      if (!mostrarAvisoVisual && !temNome && !temIngredientes) {
+        return;
+      }
+
+      try {
+        estaSalvandoRef.current = true;
+
+        const nomeFicha = temNome
+          ? dados.informacoesGerais.preparacao
+          : "Ficha Sem Nome";
+
+        const idCorreto = dados.id;
+
+        await salvarFichaDB(idCorreto, nomeFicha, jsonAtual);
+        ultimaSalvaRef.current = jsonAtual;
+
+        console.log(`[Save] "${nomeFicha}" salva com ID: ${idCorreto}`);
+
+        if (mostrarAvisoVisual) {
+          toast.success("Ficha salva");
+        }
+
+        window.dispatchEvent(new Event("fichaSalva"));
+      } catch (error) {
+        console.error("Erro ao salvar ficha:", error);
+        if (mostrarAvisoVisual) {
+          toast.error("Erro ao salvar a ficha");
+        }
+      } finally {
+        estaSalvandoRef.current = false;
+      }
+    }
+  };
+
+  const salvarFichaManualmente = () => salvarFichaAuto(true);
+
   useEffect(() => {
     if (!fichaId) return;
-    const timer = setInterval(async () => {
-      const jsonAtual = estadoAtualRef.current;
-
-      if (jsonAtual !== "" && jsonAtual !== ultimaSalvaRef.current) {
-        try {
-          const dados = JSON.parse(jsonAtual);
-          const nomeFicha =
-            dados.informacoesGerais.preparacao.trim() !== ""
-              ? dados.informacoesGerais.preparacao
-              : "Ficha Sem Nome";
-
-          await salvarFichaDB(fichaId, nomeFicha, jsonAtual);
-          ultimaSalvaRef.current = jsonAtual;
-
-          console.log(`[Auto-save] "${nomeFicha}" salva.`);
-        } catch (error) {
-          console.error("Erro no auto-save:", error);
-        }
-      }
+    const timer = setInterval(() => {
+      salvarFichaAuto(false);
     }, 30000);
 
     return () => clearInterval(timer);
   }, [fichaId]);
+
+  useEffect(() => {
+    const lidarComAtalhoTeclado = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+        e.preventDefault();
+        salvarFichaManualmente();
+      }
+    };
+
+    window.addEventListener("keydown", lidarComAtalhoTeclado);
+
+    return () => {
+      window.removeEventListener("keydown", lidarComAtalhoTeclado);
+    };
+  }, []);
 
   const limparFicha = () => {
     setFichaId(crypto.randomUUID());
@@ -215,6 +269,7 @@ export const FichaProvider = ({ children }: { children: ReactNode }) => {
         limparFicha,
         carregarFichaSalva,
         obterFichaAtualParaSalvar,
+        salvarFichaManualmente,
       }}
     >
       {children}

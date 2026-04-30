@@ -111,13 +111,31 @@ async function popularBancoSeVazio(db: Database) {
   }
 }
 
-export async function buscarNomesIngredientes(): Promise<
-  { nome: string; codigo: string }[]
-> {
+export async function pesquisarIngredientes(
+  termo: string,
+): Promise<{ nome: string; codigo: string | null }[]> {
+  if (!termo || termo.trim().length === 0) return [];
+
   const db = await Database.load(DADOS);
-  return await db.select<{ nome: string; codigo: string }[]>(
-    "SELECT nome, codigo FROM ingredientes_tabela ORDER BY nome ASC",
-  );
+  const termoQualquerLugar = `%${termo}%`;
+  const termoNoInicio = `${termo}%`;
+
+  const query = `
+    SELECT * FROM (
+        SELECT nome, codigo FROM ingredientes_tabela WHERE nome LIKE $1
+        UNION ALL
+        SELECT nome, NULL as codigo FROM ingredientes_customizados WHERE nome LIKE $1
+    )
+    ORDER BY 
+        CASE WHEN nome LIKE $2 THEN 1 ELSE 2 END,
+        nome ASC
+    LIMIT 50
+    `;
+
+  return await db.select<{ nome: string; codigo: string | null }[]>(query, [
+    termoQualquerLugar,
+    termoNoInicio,
+  ]);
 }
 
 export async function buscarDadosTabela(): Promise<Record<string, any>> {

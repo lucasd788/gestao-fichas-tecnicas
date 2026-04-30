@@ -37,6 +37,10 @@ export default function Sidebar() {
 
   useEffect(() => {
     carregarLista();
+    window.addEventListener("fichaSalva", carregarLista);
+    return () => {
+      window.removeEventListener("fichaSalva", carregarLista);
+    };
   }, []);
 
   const lidarComSalvar = async () => {

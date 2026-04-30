@@ -11,7 +11,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
     nutricaoECustos,
   } = useFicha();
 
-  const numLinhas = Math.max(10, ingredientes.length, nutricaoECustos.length);
+  const numLinhas = Math.max(1, ingredientes.length, nutricaoECustos.length);
   const indices = Array.from({ length: numLinhas }, (_, i) => i);
 
   const totais = nutricaoECustos.reduce(
@@ -124,7 +124,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
               return (
                 <tr key={i} className="h-7">
                   <td className="border border-black p-1 text-left px-3">
-                    {ing?.nome || ""}
+                    {ing?.nome || " --- "}
                   </td>
                   <td className="border border-black p-1">
                     {ing?.pesoBruto.toFixed(2).replace(".", ",") || ""}
@@ -132,7 +132,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                   <td className="border border-black p-1">
                     {ing?.pesoLiquido.toFixed(2).replace(".", ",") || ""}
                   </td>
-                  <td className="border border-black p-1">{fc}</td>
+                  <td className="border border-black p-1">{fc || " --- "}</td>
                   <td className="border border-black p-1">
                     {nutri?.perCapitaBruto.toFixed(2).replace(".", ",") || ""}
                   </td>
@@ -140,7 +140,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                     {nutri?.perCapitaLiquido.toFixed(2).replace(".", ",") || ""}
                   </td>
                   <td className="border border-black p-1 text-left px-3">
-                    {ing?.medidaCaseira || ""}
+                    {ing?.medidaCaseira || " --- "}
                   </td>
 
                   {i === 0 && (
@@ -149,7 +149,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                       className="border border-black p-3 text-left align-top bg-white"
                     >
                       <div className="whitespace-pre-wrap">
-                        {tecnicaPreparo}
+                        {tecnicaPreparo || " --- "}
                       </div>
                     </td>
                   )}
@@ -279,7 +279,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
               return (
                 <tr key={i} className="h-7">
                   <td className="border border-black p-1 text-left px-3 truncate">
-                    {nutri?.nome || ""}
+                    {nutri?.nome || " --- "}
                   </td>
                   <td className="border border-black p-1">
                     {nutri?.perCapitaBruto.toFixed(2).replace(".", ",") || ""}

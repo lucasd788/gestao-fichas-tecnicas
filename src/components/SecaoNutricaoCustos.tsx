@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { RotateCcw, Save, Trash2 } from "lucide-react";
 import { useFicha } from "../contexts/FichaContext";
 import {
@@ -140,11 +140,32 @@ export default function SecaoNutricaoCustos() {
     setNutricaoECustos,
   ]);
 
+  const totaisCalculados = useMemo(() => {
+    const totais: Record<string, number> = {
+      custoUnitario: 0,
+      energia: 0,
+      carboidratos: 0,
+      proteinas: 0,
+      lipideos: 0,
+      lipideosSaturados: 0,
+      sodio: 0,
+      fibra: 0,
+    };
+
+    ingredientes.forEach((ing) => {
+      totais.custoUnitario +=
+        Number(obterValorPorcao(ing, "custoUnitario")) || 0;
+
+      CAMPOS_NUTRICIONAIS.forEach((campo) => {
+        totais[campo] += Number(obterValorPorcao(ing, campo)) || 0;
+      });
+    });
+
+    return totais;
+  }, [ingredientes, rendimento, dadosExtras, baseExtras, bancoTabela]);
+
   const calcularTotal = (campo: string) => {
-    return ingredientes.reduce(
-      (acc, ing) => acc + (Number(obterValorPorcao(ing, campo)) || 0),
-      0,
-    );
+    return totaisCalculados[campo] || 0;
   };
 
   const formatarMoeda = (valor: number) => {
