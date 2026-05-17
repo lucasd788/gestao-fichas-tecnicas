@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "gestao-fichas-tecnicas",
-  "version": "0.1.0",
-  "identifier": "com.lucas.gestao-fichas-tecnicas",
+  "productName": "Gestão de Fichas Técnicas",
+  "version": "1.0.0",
+  "identifier": "com.lucasdiasfp.gestao-fichas-tecnicas",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "gestao-fichas-tecnicas",
+        "title": "Gestão de Fichas Técnicas",
         "width": 1400,
         "height": 700,
         "resizable": true,

@@ -419,6 +419,7 @@ export default function SecaoNutricaoCustos() {
                       </span>
                       <input
                         type="text"
+                        onFocus={(e) => e.target.select()}
                         value={formatarMoeda(
                           obterValorBase(ing, "precoUnitario") || 0,
                         )}
@@ -481,8 +482,9 @@ export default function SecaoNutricaoCustos() {
                           type="number"
                           step="0.01"
                           value={valorExibicao}
-                          title={`Valor original (100g): ${vBase.toFixed(2)}`}
-                          onFocus={() => {
+                          title={`Valor original (100g): ${vBase.toFixed(2).replace(".", ",")}`}
+                          onFocus={(e) => {
+                            e.target.select();
                             setCelulaAtiva({
                               id: ing.id,
                               campo: c,

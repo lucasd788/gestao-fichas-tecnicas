@@ -246,7 +246,7 @@ function LinhaIngrediente({
         />
       </td>
       <td className="p-1 text-center font-bold text-zinc-700 dark:text-zinc-300">
-        {fc}
+        {fc.replace(".", ",")}
       </td>
       <td className="p-1">
         <input

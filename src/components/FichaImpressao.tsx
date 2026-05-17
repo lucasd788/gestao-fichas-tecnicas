@@ -50,6 +50,10 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
     },
   );
 
+  const temIngredientesPreenchidos = ingredientes.some(
+    (ing) => ing?.nome && ing.nome.trim() !== "",
+  );
+
   const formatarNumero = (valor: number | string | undefined | null) => {
     if (valor === undefined || valor === null || valor === "") return "";
     const numero = Number(valor);
@@ -142,31 +146,34 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                 const nutri = nutricaoECustos[indiceReal] as
                   | DadosNutricionais
                   | undefined;
+
+                const isVazio = !ing?.nome || ing.nome.trim() === "";
+
                 const fc =
-                  ing && ing.pesoLiquido > 0
+                  !isVazio && ing && ing.pesoLiquido > 0
                     ? formatarNumero(ing.pesoBruto / ing.pesoLiquido)
                     : "";
 
                 return (
                   <tr key={indiceReal} className="h-7">
                     <td className="border border-black p-1 text-left px-3 truncate">
-                      {ing?.nome || " --- "}
+                      {isVazio ? "" : ing?.nome}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(ing?.pesoBruto)}
+                      {isVazio ? "" : formatarNumero(ing?.pesoBruto)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(ing?.pesoLiquido)}
+                      {isVazio ? "" : formatarNumero(ing?.pesoLiquido)}
                     </td>
-                    <td className="border border-black p-1">{fc || " --- "}</td>
+                    <td className="border border-black p-1">{fc}</td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.perCapitaBruto)}
+                      {isVazio ? "" : formatarNumero(nutri?.perCapitaBruto)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.perCapitaLiquido)}
+                      {isVazio ? "" : formatarNumero(nutri?.perCapitaLiquido)}
                     </td>
                     <td className="border border-black p-1 text-left px-3 truncate">
-                      {ing?.medidaCaseira || " --- "}
+                      {isVazio ? "" : ing?.medidaCaseira || ""}
                     </td>
 
                     {indexNaPagina === 0 && (
@@ -175,7 +182,7 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                         className="border border-black p-3 text-left align-top bg-white"
                       >
                         <div className="whitespace-pre-wrap">
-                          {tecnicaPreparo || " --- "}
+                          {tecnicaPreparo || ""}
                         </div>
                       </td>
                     )}
@@ -190,21 +197,27 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
               <div className="space-y-4">
                 <div>
                   <span className="font-bold">Tempo de preparo:</span>{" "}
-                  {rendimento.tempoPreparo}
+                  {rendimento.tempoPreparo || ""}
                 </div>
                 <div>
                   <span className="font-bold">Peso total da preparação:</span>{" "}
-                  {rendimento.pesoTotal}
+                  {temIngredientesPreenchidos && rendimento.pesoTotal
+                    ? rendimento.pesoTotal
+                    : ""}
                 </div>
                 <div>
                   <span className="font-bold">
                     Indicador de Conversão (Fator de Cocção):
                   </span>{" "}
-                  {formatarNumero(rendimento.fatorCoccao)}
+                  {temIngredientesPreenchidos && rendimento.fatorCoccao
+                    ? formatarNumero(rendimento.fatorCoccao)
+                    : ""}
                 </div>
                 <div>
                   <span className="font-bold">Peso da porção (g):</span>{" "}
-                  {rendimento.pesoPorcao}
+                  {temIngredientesPreenchidos && rendimento.pesoPorcao
+                    ? rendimento.pesoPorcao
+                    : ""}
                 </div>
               </div>
               <div className="space-y-4">
@@ -212,15 +225,17 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                   <span className="font-bold">
                     Número de porções – rendimento:
                   </span>{" "}
-                  {rendimento.rendimentoPorcoes}
+                  {temIngredientesPreenchidos && rendimento.rendimentoPorcoes
+                    ? rendimento.rendimentoPorcoes
+                    : ""}
                 </div>
                 <div>
                   <span className="font-bold">Porção em medida caseira:</span>{" "}
-                  {rendimento.medidaCaseiraPorcao}
+                  {rendimento.medidaCaseiraPorcao || ""}
                 </div>
                 <div>
                   <span className="font-bold">Utensílios e equipamentos:</span>
-                  <p className="mt-1">{rendimento.equipamentos}</p>
+                  <p className="mt-1">{rendimento.equipamentos || ""}</p>
                 </div>
               </div>
             </div>
@@ -316,43 +331,46 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                 const nutri = nutricaoECustos[indiceReal] as
                   | DadosNutricionais
                   | undefined;
+
+                const isVazio = !nutri?.nome || nutri.nome.trim() === "";
+
                 return (
                   <tr key={indiceReal} className="h-7">
                     <td className="border border-black p-1 text-left px-3 truncate">
-                      {nutri?.nome || " --- "}
+                      {isVazio ? "" : nutri?.nome}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.perCapitaBruto)}
+                      {isVazio ? "" : formatarNumero(nutri?.perCapitaBruto)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.precoUnitario)}
+                      {isVazio ? "" : formatarNumero(nutri?.precoUnitario)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.custoUnitario)}
+                      {isVazio ? "" : formatarNumero(nutri?.custoUnitario)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.perCapitaLiquido)}
+                      {isVazio ? "" : formatarNumero(nutri?.perCapitaLiquido)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.energia)}
+                      {isVazio ? "" : formatarNumero(nutri?.energia)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.carboidratos)}
+                      {isVazio ? "" : formatarNumero(nutri?.carboidratos)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.proteinas)}
+                      {isVazio ? "" : formatarNumero(nutri?.proteinas)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.lipideos)}
+                      {isVazio ? "" : formatarNumero(nutri?.lipideos)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.lipideosSaturados)}
+                      {isVazio ? "" : formatarNumero(nutri?.lipideosSaturados)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.sodio)}
+                      {isVazio ? "" : formatarNumero(nutri?.sodio)}
                     </td>
                     <td className="border border-black p-1">
-                      {formatarNumero(nutri?.fibra)}
+                      {isVazio ? "" : formatarNumero(nutri?.fibra)}
                     </td>
                   </tr>
                 );
@@ -366,29 +384,45 @@ const FichaImpressao = forwardRef<HTMLDivElement>((_, ref) => {
                   <td className="border border-black p-2">- - - -</td>
                   <td className="border border-black p-2">- - - -</td>
                   <td className="border border-black p-2">
-                    {formatarNumero(totais.custo)}
+                    {temIngredientesPreenchidos
+                      ? formatarNumero(totais.custo)
+                      : ""}
                   </td>
                   <td className="border border-black p-2">- - - -</td>
                   <td className="border border-black p-2">
-                    {formatarNumero(totais.energia)}
+                    {temIngredientesPreenchidos
+                      ? formatarNumero(totais.energia)
+                      : ""}
                   </td>
                   <td className="border border-black p-2">
-                    {formatarNumero(totais.carb)}
+                    {temIngredientesPreenchidos
+                      ? formatarNumero(totais.carb)
+                      : ""}
                   </td>
                   <td className="border border-black p-2">
-                    {formatarNumero(totais.prot)}
+                    {temIngredientesPreenchidos
+                      ? formatarNumero(totais.prot)
+                      : ""}
                   </td>
                   <td className="border border-black p-2">
-                    {formatarNumero(totais.lip)}
+                    {temIngredientesPreenchidos
+                      ? formatarNumero(totais.lip)
+                      : ""}
                   </td>
                   <td className="border border-black p-2">
-                    {formatarNumero(totais.sat)}
+                    {temIngredientesPreenchidos
+                      ? formatarNumero(totais.sat)
+                      : ""}
                   </td>
                   <td className="border border-black p-2">
-                    {formatarNumero(totais.sodio)}
+                    {temIngredientesPreenchidos
+                      ? formatarNumero(totais.sodio)
+                      : ""}
                   </td>
                   <td className="border border-black p-2">
-                    {formatarNumero(totais.fibra)}
+                    {temIngredientesPreenchidos
+                      ? formatarNumero(totais.fibra)
+                      : ""}
                   </td>
                 </tr>
               )}
