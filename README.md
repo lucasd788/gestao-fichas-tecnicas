@@ -43,7 +43,7 @@ _(Clique nas imagens para ampliar)_
 
 ---
 
-## ✨ Funcionalidades
+## 🚀 Funcionalidades
 
 - **Gestão de Receitas e Custos:** Cadastro integrado de preparo, equipamentos e cálculo automático de rendimento e custo por porção.
 - **Cálculo Nutricional Integrado (TBCA):** Base de dados da Tabela Brasileira de Composição de Alimentos inclusa nativamente, com suporte total para a criação de ingredientes customizados.
@@ -106,8 +106,6 @@ O aplicativo será compilado e uma janela nativa se abrirá automaticamente!
 ## 📦 Download
 
 Você pode baixar a versão mais recente e pronta para uso diretamente na página de [Releases](https://github.com/lucasd788/gestao-fichas-tecnicas/releases) deste repositório.
-
-Basta escolher a versão desejada, expandir a aba de _Assets_ e fazer o download do arquivo instalador adequado para o seu sistema operacional (ex: `.msi` para Windows).
 
 ---
 
